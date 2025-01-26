@@ -65,7 +65,6 @@ class LESAM(torch.optim.Optimizer):
     def step(self,g_update=None):
         inputs, labels, loss_func, model = self.paras
 
-
         self.first_step(g_update)
 
         predictions = model(inputs)

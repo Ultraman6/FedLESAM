@@ -1,3 +1,4 @@
+import io
 import os
 import numpy as np
 
@@ -12,7 +13,7 @@ from PIL import Image
 import torchvision.datasets as datasets
 class ImageData(object):
 
-    def __init__(self, dataset, path="/mnt/workspace/colla_group/data/"):
+    def __init__(self, dataset, path="E:\data"):
         dataset = os.path.join(path, dataset)
         data = datasets.ImageFolder(dataset, transform=self._TRANSFORM)
         labels = data.classes
@@ -26,12 +27,6 @@ class ImageData(object):
 
     def __len__(self):
         return len(self.data)
-
-    @staticmethod
-    def get_data_name_by_index(index):
-        name = ImageTextData._DATA_FOLDER[index]
-        name = name.replace('/', '_')
-        return name
 
     _TRANSFORM = transforms.Compose([
         transforms.Resize(256),
@@ -58,10 +53,7 @@ class DatasetObject:
         self.name += '_%f' %unbalanced_sgm if unbalanced_sgm!=0 else ''
         self.unbalanced_sgm = unbalanced_sgm
         self.data_path = data_path
-        if rule not in ["Pathological","Dirichlet"]:
-            self.set_data_dg()
-        else:
-            self.set_data()
+        self.set_data()
     
     def set_data(self):
         # Prepare data if not ready
@@ -214,7 +206,6 @@ class DatasetObject:
                     if client_data_list[client_i] > diff:
                         client_data_list[client_i] -= diff
                         break
-            ###     
             
             if self.rule == 'Dirichlet' or self.rule == 'Pathological':
                 if self.rule == 'Dirichlet':
@@ -430,194 +421,194 @@ class DatasetSynthetic:
 # To make the dataset smaller,
 # We take 2000 datapoints for each client in the train_set
 
-class ShakespeareObjectCrop:
-    def __init__(self, data_path, dataset_prefix, crop_amount=2000, test_ratio=5, rand_seed=0):
-        self.dataset = 'shakespeare'
-        self.name    = dataset_prefix
-        users, groups, train_data, test_data = read_data(data_path+'train/', data_path+'test/')
+# class ShakespeareObjectCrop:
+#     def __init__(self, data_path, dataset_prefix, crop_amount=2000, test_ratio=5, rand_seed=0):
+#         self.dataset = 'shakespeare'
+#         self.name = dataset_prefix
+#         users, groups, train_data, test_data = read_data(data_path+'train/', data_path+'test/')
+#
+#         # train_data is a dictionary whose keys are users list elements
+#         # the value of each key is another dictionary.
+#         # This dictionary consists of key value pairs as
+#         # (x, features - list of input 80 lenght long words) and (y, target - list one letter)
+#         # test_data has the same strucute.
+#
+#         # Ignore groups information, combine test cases for different clients into one test data
+#         # Change structure to DatasetObject structure
+#
+#         self.users = users
+#
+#         self.n_client = len(users)
+#         self.user_idx = np.asarray(list(range(self.n_client)))
+#         self.client_x = list(range(self.n_client))
+#         self.client_y = list(range(self.n_client))
+#
+#         print(train_data)
+#         print(test_data)
+#
+#         test_data_count = 0
+#
+#         for client in range(self.n_client):
+#             np.random.seed(rand_seed + client)
+#             start = np.random.randint(len(train_data[users[client]]['x'])-crop_amount)
+#             self.client_x[client] = np.asarray(train_data[users[client]]['x'])[start:start+crop_amount]
+#             self.client_y[client] = np.asarray(train_data[users[client]]['y'])[start:start+crop_amount]
+#
+#         test_data_count = (crop_amount//test_ratio) * self.n_client
+#         self.test_x = list(range(test_data_count))
+#         self.test_y = list(range(test_data_count))
+#
+#         test_data_count = 0
+#         for client in range(self.n_client):
+#             curr_amount = (crop_amount//test_ratio)
+#             np.random.seed(rand_seed + client)
+#             start = np.random.randint(len(test_data[users[client]]['x'])-curr_amount)
+#             self.test_x[test_data_count: test_data_count+ curr_amount] = np.asarray(test_data[users[client]]['x'])[start:start+curr_amount]
+#             self.test_y[test_data_count: test_data_count+ curr_amount] = np.asarray(test_data[users[client]]['y'])[start:start+curr_amount]
+#
+#             test_data_count += curr_amount
+#
+#         self.client_x = np.asarray(self.client_x)
+#         self.client_y = np.asarray(self.client_y)
+#
+#         self.test_x = np.asarray(self.test_x)
+#         self.test_y = np.asarray(self.test_y)
+#
+#         # Convert characters to numbers
+#
+#         self.client_x_char = np.copy(self.client_x)
+#         self.client_y_char = np.copy(self.client_y)
+#
+#         self.test_x_char = np.copy(self.test_x)
+#         self.test_y_char = np.copy(self.test_y)
+#
+#         self.client_x = list(range(len(self.client_x_char)))
+#         self.client_y = list(range(len(self.client_x_char)))
+#
+#
+#         for client in range(len(self.client_x_char)):
+#             client_list_x = list(range(len(self.client_x_char[client])))
+#             client_list_y = list(range(len(self.client_x_char[client])))
+#
+#             for idx in range(len(self.client_x_char[client])):
+#                 client_list_x[idx] = np.asarray(word_to_indices(self.client_x_char[client][idx]))
+#                 client_list_y[idx] = np.argmax(np.asarray(letter_to_vec(self.client_y_char[client][idx]))).reshape(-1)
+#
+#             self.client_x[client] = np.asarray(client_list_x)
+#             self.client_y[client] = np.asarray(client_list_y)
+#
+#         self.client_x = np.asarray(self.client_x)
+#         self.client_y = np.asarray(self.client_y)
+#
+#
+#         self.test_x = list(range(len(self.test_x_char)))
+#         self.test_y = list(range(len(self.test_x_char)))
+#
+#         for idx in range(len(self.test_x_char)):
+#             self.test_x[idx] = np.asarray(word_to_indices(self.test_x_char[idx]))
+#             self.test_y[idx] = np.argmax(np.asarray(letter_to_vec(self.test_y_char[idx]))).reshape(-1)
+#
+#         self.test_x = np.asarray(self.test_x)
+#         self.test_y = np.asarray(self.test_y)
         
-        # train_data is a dictionary whose keys are users list elements
-        # the value of each key is another dictionary.
-        # This dictionary consists of key value pairs as 
-        # (x, features - list of input 80 lenght long words) and (y, target - list one letter)
-        # test_data has the same strucute.
-        
-        # Ignore groups information, combine test cases for different clients into one test data
-        # Change structure to DatasetObject structure
-        
-        self.users = users
-        
-        self.n_client = len(users)
-        self.user_idx = np.asarray(list(range(self.n_client)))
-        self.client_x = list(range(self.n_client))
-        self.client_y = list(range(self.n_client))
-
-        print(train_data)
-        print(test_data)
-        
-        test_data_count = 0
-        
-        for client in range(self.n_client):
-            np.random.seed(rand_seed + client)
-            start = np.random.randint(len(train_data[users[client]]['x'])-crop_amount)
-            self.client_x[client] = np.asarray(train_data[users[client]]['x'])[start:start+crop_amount]
-            self.client_y[client] = np.asarray(train_data[users[client]]['y'])[start:start+crop_amount]
-            
-        test_data_count = (crop_amount//test_ratio) * self.n_client
-        self.test_x = list(range(test_data_count))
-        self.test_y = list(range(test_data_count))
-        
-        test_data_count = 0
-        for client in range(self.n_client):
-            curr_amount = (crop_amount//test_ratio)
-            np.random.seed(rand_seed + client)
-            start = np.random.randint(len(test_data[users[client]]['x'])-curr_amount)
-            self.test_x[test_data_count: test_data_count+ curr_amount] = np.asarray(test_data[users[client]]['x'])[start:start+curr_amount]
-            self.test_y[test_data_count: test_data_count+ curr_amount] = np.asarray(test_data[users[client]]['y'])[start:start+curr_amount]
-            
-            test_data_count += curr_amount
-        
-        self.client_x = np.asarray(self.client_x)
-        self.client_y = np.asarray(self.client_y)
-        
-        self.test_x = np.asarray(self.test_x)
-        self.test_y = np.asarray(self.test_y)
-        
-        # Convert characters to numbers
-        
-        self.client_x_char = np.copy(self.client_x)
-        self.client_y_char = np.copy(self.client_y)
-        
-        self.test_x_char = np.copy(self.test_x)
-        self.test_y_char = np.copy(self.test_y)
-        
-        self.client_x = list(range(len(self.client_x_char)))
-        self.client_y = list(range(len(self.client_x_char)))
-        
-
-        for client in range(len(self.client_x_char)):
-            client_list_x = list(range(len(self.client_x_char[client])))
-            client_list_y = list(range(len(self.client_x_char[client])))
-            
-            for idx in range(len(self.client_x_char[client])):
-                client_list_x[idx] = np.asarray(word_to_indices(self.client_x_char[client][idx]))
-                client_list_y[idx] = np.argmax(np.asarray(letter_to_vec(self.client_y_char[client][idx]))).reshape(-1)
-
-            self.client_x[client] = np.asarray(client_list_x)
-            self.client_y[client] = np.asarray(client_list_y)
-                
-        self.client_x = np.asarray(self.client_x)
-        self.client_y = np.asarray(self.client_y)
-        
-        
-        self.test_x = list(range(len(self.test_x_char)))
-        self.test_y = list(range(len(self.test_x_char)))
-                
-        for idx in range(len(self.test_x_char)):
-            self.test_x[idx] = np.asarray(word_to_indices(self.test_x_char[idx]))
-            self.test_y[idx] = np.argmax(np.asarray(letter_to_vec(self.test_y_char[idx]))).reshape(-1)
-        
-        self.test_x = np.asarray(self.test_x)
-        self.test_y = np.asarray(self.test_y)
-        
-class ShakespeareObjectCrop_noniid:
-    def __init__(self, data_path, dataset_prefix, n_client=100, crop_amount=2000, test_ratio=5, rand_seed=0):
-        self.dataset = 'shakespeare'
-        self.name    = dataset_prefix
-        users, groups, train_data, test_data = read_data(data_path+'train/', data_path+'test/')
-
-        # train_data is a dictionary whose keys are users list elements
-        # the value of each key is another dictionary.
-        # This dictionary consists of key value pairs as 
-        # (x, features - list of input 80 lenght long words) and (y, target - list one letter)
-        # test_data has the same strucute.
-        # Why do we have different test for different clients?
-        
-        # Change structure to DatasetObject structure
-        
-        self.users = users
-
-        test_data_count_per_client = (crop_amount//test_ratio)
-        # Group clients that have at least crop_amount datapoints
-        arr = []
-        for client in range(len(users)):
-            if (len(np.asarray(train_data[users[client]]['y'])) > crop_amount 
-                and len(np.asarray(test_data[users[client]]['y'])) > test_data_count_per_client):
-                arr.append(client)
-
-        # choose n_client clients randomly
-        self.n_client = n_client
-        np.random.seed(rand_seed)
-        np.random.shuffle(arr)
-        self.user_idx = arr[:self.n_client]
-          
-        self.client_x = list(range(self.n_client))
-        self.client_y = list(range(self.n_client))
-        
-        test_data_count = 0
-
-        for client, idx in enumerate(self.user_idx):
-            np.random.seed(rand_seed + client)
-            start = np.random.randint(len(train_data[users[idx]]['x'])-crop_amount)
-            self.client_x[client] = np.asarray(train_data[users[idx]]['x'])[start:start+crop_amount]
-            self.client_y[client] = np.asarray(train_data[users[idx]]['y'])[start:start+crop_amount]
-
-        test_data_count = (crop_amount//test_ratio) * self.n_client
-        self.test_x = list(range(test_data_count))
-        self.test_y = list(range(test_data_count))
-        
-        test_data_count = 0
-
-        for client, idx in enumerate(self.user_idx):
-            
-            curr_amount = (crop_amount//test_ratio)
-            np.random.seed(rand_seed + client)
-            start = np.random.randint(len(test_data[users[idx]]['x'])-curr_amount)
-            self.test_x[test_data_count: test_data_count+ curr_amount] = np.asarray(test_data[users[idx]]['x'])[start:start+curr_amount]
-            self.test_y[test_data_count: test_data_count+ curr_amount] = np.asarray(test_data[users[idx]]['y'])[start:start+curr_amount]
-            test_data_count += curr_amount
-
-        self.client_x = np.asarray(self.client_x)
-        self.client_y = np.asarray(self.client_y)
-        
-        self.test_x = np.asarray(self.test_x)
-        self.test_y = np.asarray(self.test_y)
-        
-        # Convert characters to numbers
-        
-        self.client_x_char = np.copy(self.client_x)
-        self.client_y_char = np.copy(self.client_y)
-        
-        self.test_x_char = np.copy(self.test_x)
-        self.test_y_char = np.copy(self.test_y)
-        
-        self.client_x = list(range(len(self.client_x_char)))
-        self.client_y = list(range(len(self.client_x_char)))
-
-        for client in range(len(self.client_x_char)):
-            client_list_x = list(range(len(self.client_x_char[client])))
-            client_list_y = list(range(len(self.client_x_char[client])))
-            
-            for idx in range(len(self.client_x_char[client])):
-                client_list_x[idx] = np.asarray(word_to_indices(self.client_x_char[client][idx]))
-                client_list_y[idx] = np.argmax(np.asarray(letter_to_vec(self.client_y_char[client][idx]))).reshape(-1)
-
-            self.client_x[client] = np.asarray(client_list_x)
-            self.client_y[client] = np.asarray(client_list_y)
-                
-        self.client_x = np.asarray(self.client_x)
-        self.client_y = np.asarray(self.client_y)
-        
-        
-        self.test_x = list(range(len(self.test_x_char)))
-        self.test_y = list(range(len(self.test_x_char)))
-                
-        for idx in range(len(self.test_x_char)):
-            self.test_x[idx] = np.asarray(word_to_indices(self.test_x_char[idx]))
-            self.test_y[idx] = np.argmax(np.asarray(letter_to_vec(self.test_y_char[idx]))).reshape(-1)
-        
-        self.test_x = np.asarray(self.test_x)
-        self.test_y = np.asarray(self.test_y)
+# class ShakespeareObjectCrop_noniid:
+#     def __init__(self, data_path, dataset_prefix, n_client=100, crop_amount=2000, test_ratio=5, rand_seed=0):
+#         self.dataset = 'shakespeare'
+#         self.name    = dataset_prefix
+#         users, groups, train_data, test_data = read_data(data_path+'train/', data_path+'test/')
+#
+#         # train_data is a dictionary whose keys are users list elements
+#         # the value of each key is another dictionary.
+#         # This dictionary consists of key value pairs as
+#         # (x, features - list of input 80 lenght long words) and (y, target - list one letter)
+#         # test_data has the same strucute.
+#         # Why do we have different test for different clients?
+#
+#         # Change structure to DatasetObject structure
+#
+#         self.users = users
+#
+#         test_data_count_per_client = (crop_amount//test_ratio)
+#         # Group clients that have at least crop_amount datapoints
+#         arr = []
+#         for client in range(len(users)):
+#             if (len(np.asarray(train_data[users[client]]['y'])) > crop_amount
+#                 and len(np.asarray(test_data[users[client]]['y'])) > test_data_count_per_client):
+#                 arr.append(client)
+#
+#         # choose n_client clients randomly
+#         self.n_client = n_client
+#         np.random.seed(rand_seed)
+#         np.random.shuffle(arr)
+#         self.user_idx = arr[:self.n_client]
+#
+#         self.client_x = list(range(self.n_client))
+#         self.client_y = list(range(self.n_client))
+#
+#         test_data_count = 0
+#
+#         for client, idx in enumerate(self.user_idx):
+#             np.random.seed(rand_seed + client)
+#             start = np.random.randint(len(train_data[users[idx]]['x'])-crop_amount)
+#             self.client_x[client] = np.asarray(train_data[users[idx]]['x'])[start:start+crop_amount]
+#             self.client_y[client] = np.asarray(train_data[users[idx]]['y'])[start:start+crop_amount]
+#
+#         test_data_count = (crop_amount//test_ratio) * self.n_client
+#         self.test_x = list(range(test_data_count))
+#         self.test_y = list(range(test_data_count))
+#
+#         test_data_count = 0
+#
+#         for client, idx in enumerate(self.user_idx):
+#
+#             curr_amount = (crop_amount//test_ratio)
+#             np.random.seed(rand_seed + client)
+#             start = np.random.randint(len(test_data[users[idx]]['x'])-curr_amount)
+#             self.test_x[test_data_count: test_data_count+ curr_amount] = np.asarray(test_data[users[idx]]['x'])[start:start+curr_amount]
+#             self.test_y[test_data_count: test_data_count+ curr_amount] = np.asarray(test_data[users[idx]]['y'])[start:start+curr_amount]
+#             test_data_count += curr_amount
+#
+#         self.client_x = np.asarray(self.client_x)
+#         self.client_y = np.asarray(self.client_y)
+#
+#         self.test_x = np.asarray(self.test_x)
+#         self.test_y = np.asarray(self.test_y)
+#
+#         # Convert characters to numbers
+#
+#         self.client_x_char = np.copy(self.client_x)
+#         self.client_y_char = np.copy(self.client_y)
+#
+#         self.test_x_char = np.copy(self.test_x)
+#         self.test_y_char = np.copy(self.test_y)
+#
+#         self.client_x = list(range(len(self.client_x_char)))
+#         self.client_y = list(range(len(self.client_x_char)))
+#
+#         for client in range(len(self.client_x_char)):
+#             client_list_x = list(range(len(self.client_x_char[client])))
+#             client_list_y = list(range(len(self.client_x_char[client])))
+#
+#             for idx in range(len(self.client_x_char[client])):
+#                 client_list_x[idx] = np.asarray(word_to_indices(self.client_x_char[client][idx]))
+#                 client_list_y[idx] = np.argmax(np.asarray(letter_to_vec(self.client_y_char[client][idx]))).reshape(-1)
+#
+#             self.client_x[client] = np.asarray(client_list_x)
+#             self.client_y[client] = np.asarray(client_list_y)
+#
+#         self.client_x = np.asarray(self.client_x)
+#         self.client_y = np.asarray(self.client_y)
+#
+#
+#         self.test_x = list(range(len(self.test_x_char)))
+#         self.test_y = list(range(len(self.test_x_char)))
+#
+#         for idx in range(len(self.test_x_char)):
+#             self.test_x[idx] = np.asarray(word_to_indices(self.test_x_char[idx]))
+#             self.test_y[idx] = np.argmax(np.asarray(letter_to_vec(self.test_y_char[idx]))).reshape(-1)
+#
+#         self.test_x = np.asarray(self.test_x)
+#         self.test_y = np.asarray(self.test_y)
     
 class Dataset(torch.utils.data.Dataset):
     

@@ -1,3 +1,4 @@
+import datetime
 import os
 import time
 import numpy as np
@@ -103,7 +104,7 @@ class Server(object):
             if acc>self.best:
                 self.best=acc
                 #torch
-                name='/mnt/workspace/zqfan/'+self.args.method+'.pt'
+                name='Test/'+self.args.method+'.pt'
                 torch.save(self.server_model.state_dict(),name)
             # validation on test set
             #loss, acc = self._validate_(testdataset)
@@ -128,11 +129,11 @@ class Server(object):
             if acc>self.best:
                 self.best=acc
                 #torch
-                name='/mnt/workspace/zqfan/'+self.args.method+'_best.pt'
+                name='Test/'+self.args.method+'_best.pt'
                 torch.save(self.server_model.state_dict(),name)
             if t%5==0:
 
-                name='/mnt/workspace/zqfan/modelsave/'+self.args.method+"_"+str(t)+'.pt'
+                name='Test/modelsave/'+self.args.method+"_"+str(t)+'.pt'
                 torch.save(self.server_model.state_dict(),name)
             # calculate consistency
             self._see_the_divergence_(selected_clients, t)

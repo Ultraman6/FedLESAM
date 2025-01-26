@@ -2,9 +2,9 @@ import torch
 from client import *
 from .server import Server
 
-class FedLESAM(Server):
+class FedORAL(Server):
     def __init__(self, device, model_func, init_model, init_par_list, datasets, method, args):   
-        super(FedLESAM, self).__init__(device, model_func, init_model, init_par_list, datasets, method, args)
+        super(FedORAL, self).__init__(device, model_func, init_model, init_par_list, datasets, method, args)
         # rebuild
         self.comm_vecs = {
             'Params_list': init_par_list.clone().detach(),

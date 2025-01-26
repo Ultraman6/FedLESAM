@@ -21,8 +21,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--mode', choices=['normal'], type=str, default='normal')
 parser.add_argument('--dataset', choices=['CIFAR10', 'CIFAR100'], type=str, default='CIFAR10')             # select dataset
 parser.add_argument('--model', choices=['ResNet18','ResNet18P','ResNet18_100'], type=str, default='ResNet18')                    # select model
-parser.add_argument('--non-iid', action='store_true', default=False)                                       # activate if use heterogeneous dataset 
-parser.add_argument('--split-rule',default='Dirichlet')  # select the dataset splitting rule
+parser.add_argument('--non-iid', default=True)                                       # activate if use heterogeneous dataset
+parser.add_argument('--split-rule', default='Dirichlet')  # select the dataset splitting rule
 parser.add_argument('--split-coef', default=0.1, type=float)                                                 # --> if Dirichlet: select the Dirichlet coefficient (i.e. 0.1, 0.3, 0.6, 1)
                                                                                                              # --> if Pathological: select the Dirichlet coefficient (i.e. 3, 5)
 parser.add_argument('--active-ratio', default=0.05, type=float)                                              # select the partial participating ratio (i.e. 0.1, 0.05)
@@ -51,7 +51,7 @@ parser.add_argument('--gamma', default=1.0, type=float)                         
 parser.add_argument('--epsilon', default=0.01, type=float)                                                 # select the minimal value for avoiding zero-division
 
 parser.add_argument('--method', choices=['FedAvg', 'FedCM', 'FedDyn', 'SCAFFOLD', 'FedAdam', 'FedProx', 'FedSAM', 'MoFedSAM', \
-                                         'FedSpeed','FedLESAM','FedGAMMA','FedLESAM_S','FedLESAM_D'], type=str, default='FedAvg')
+                                         'FedSpeed','FedLESAM','FedGAMMA','FedLESAM_S','FedLESAM_D'], type=str, default='FedLESAM')
                                          
 args = parser.parse_args()
 # print(args)
